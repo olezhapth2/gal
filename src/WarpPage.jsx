@@ -240,6 +240,12 @@ export default function WarpPage() {
           </div>
         </div>
       )}
+      {/* мобильный: сверху темно→прозрачно вниз, чтобы текст читался,
+          а нижний ряд оставался видимым */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[55vh] bg-gradient-to-b from-[#06030f] via-[#06030f]/55 to-transparent md:hidden"
+      />
       {/* dip свапа: ниже контента (80) — заголовок и док остаются яркими */}
       {bgOn && (
         <div

@@ -26,3 +26,4 @@ dist-ssr
 # личное — не в репозиторий проекта
 cover-letters/
 .vercel
+.env*

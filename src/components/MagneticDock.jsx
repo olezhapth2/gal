@@ -460,17 +460,17 @@ function MagneticDockBase({
             <div ref={rowRef} className="flex w-full items-end justify-between">
               <WarmTooltipGroup delay={100} warmWindow={800} travel={280} lean={8}>
                 {items.map((item, i) => (
-                  <WarmTooltip
-                    key={item.id}
-                    content={item.label}
-                    side="bottom"
-                    surfaceColor="#fafafa"
-                    inkColor="#080c14"
-                    radius={12}
-                    gap={36}
-                    arrow={false}
-                    popDuration={120}
-                  >
+                  <div key={item.id} className="flex flex-col items-center">
+                    <WarmTooltip
+                      content={item.label}
+                      side="bottom"
+                      surfaceColor="#fafafa"
+                      inkColor="#080c14"
+                      radius={12}
+                      gap={36}
+                      arrow={false}
+                      popDuration={120}
+                    >
                     <button
                       type="button"
                       ref={(el) => {
@@ -515,7 +515,11 @@ function MagneticDockBase({
                         {item.icon ?? item.label.slice(0, 1).toUpperCase()}
                       </span>
                     </button>
-                  </WarmTooltip>
+                    </WarmTooltip>
+                    <span className="mt-4 max-w-[54px] truncate text-center text-[9px] font-semibold leading-none tracking-wide text-white/55 md:hidden">
+                      {item.label}
+                    </span>
+                  </div>
                 ))}
               </WarmTooltipGroup>
             </div>

@@ -410,6 +410,7 @@ function createGlassEngine(mount, opts) {
       period: built.period,
       offset: rowMeshes.length * 0.35,
       target: rowMeshes.length * 0.35,
+      isLast: rowMeshes.length === rows.length - 1,
       dragging: false,
       speed: 2 / def.duration * SLOW_FACTOR,
       rowTop: 0,
@@ -676,7 +677,8 @@ function createGlassEngine(mount, opts) {
         for (let i = 0; i < r.cards.length; i++) {
           const v = getMedia(r.cards[i].src);
           const t = mediaTime(v);
-          const a = i === hi ? 1 : CARD_ALPHA;
+          const base = r.isLast && W < 768 ? 0.9 : CARD_ALPHA;
+          const a = i === hi ? 1 : base;
           if (t === r.lastT[i] && a === r.lastA[i]) continue;
           r.lastT[i] = t;
           r.lastA[i] = a;
