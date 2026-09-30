@@ -410,7 +410,6 @@ function createGlassEngine(mount, opts) {
       period: built.period,
       offset: rowMeshes.length * 0.35,
       target: rowMeshes.length * 0.35,
-      isMiddle: rowMeshes.length === (rows.length - 1) >> 1,
       dragging: false,
       speed: 2 / def.duration * SLOW_FACTOR,
       rowTop: 0,
@@ -525,6 +524,21 @@ function createGlassEngine(mount, opts) {
     }
     return best;
   }
+  function hitCard(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    for (const r of rowMeshes) {
+      if (y < r.rowTop || y > r.rowTop + cardH) continue;
+      let u = x / r.period + r.offset;
+      u -= Math.floor(u);
+      const cx = u * r.period;
+      for (let i = 0; i < r.cards.length; i++) {
+        if (cx >= r.xs[i] && cx <= r.xs[i] + r.ws[i]) return r.cards[i];
+      }
+    }
+    return null;
+  }
   const onWheel = (e) => {
     const row = rowAtLocal(e.clientY);
     if (!row) return;
@@ -580,6 +594,10 @@ function createGlassEngine(mount, opts) {
     if (!gesture || e.pointerId !== gesture.id) return;
     const g = gesture;
     gesture = null;
+    if (fling && g.axis === null) {
+      const card = hitCard(g.sx, g.sy);
+      if (card) opts.onCardClick?.(card);
+    }
     if (g.axis === "x") {
       if (fling && !reduced) {
         g.row.target -= g.vel * FLING / g.row.period;
@@ -663,7 +681,8 @@ function createGlassEngine(mount, opts) {
     if (hoverDirty || texTimer >= 1 / TEX_FPS) {
       texTimer = 0;
       hoverDirty = false;
-      for (const r of rowMeshes) {
+      for (let ri = 0; ri < rowMeshes.length; ri++) {
+        const r = rowMeshes[ri];
         let hi = -1;
         if (hover.inside && hover.y >= r.rowTop && hover.y <= r.rowTop + cardH) {
           let u = hover.x / r.period + r.offset;
@@ -680,7 +699,14 @@ function createGlassEngine(mount, opts) {
         for (let i = 0; i < r.cards.length; i++) {
           const v = getMedia(r.cards[i].src);
           const t = mediaTime(v);
-          const base = r.isMiddle && W < 768 ? 0.9 : CARD_ALPHA;
+          const base =
+            W < 768
+              ? ri === 0
+                ? 0.9
+                : ri === 1
+                  ? 0.7
+                  : CARD_ALPHA
+              : CARD_ALPHA;
           const a = i === hi ? 1 : base;
           if (t === r.lastT[i] && a === r.lastA[i]) continue;
           r.lastT[i] = t;
@@ -748,7 +774,8 @@ export function GlassRows({
   fallback,
   className,
   switchSignal = 0,
-  transition = "idle"
+  transition = "idle",
+  onCardClick
 }) {
   const mountRef = useRef(null);
   const [failed, setFailed] = useState(false);
@@ -757,6 +784,10 @@ export function GlassRows({
   const transitionRef = useRef(transition);
   useEffect(() => {
     transitionRef.current = transition;
+  });
+  const cardClickRef = useRef(onCardClick);
+  useEffect(() => {
+    cardClickRef.current = onCardClick;
   });
   const sigRef = useRef(switchSignal);
   useEffect(() => {
@@ -780,7 +811,8 @@ export function GlassRows({
     const engine = createGlassEngine(mount, {
       rows,
       cardW,
-      startPhase: transitionRef.current === "out" ? "out" : null
+      startPhase: transitionRef.current === "out" ? "out" : null,
+      onCardClick: (card) => cardClickRef.current?.(card)
     });
     if (!engine) {
       setFailed(true);

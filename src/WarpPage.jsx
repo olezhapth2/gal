@@ -11,6 +11,7 @@ import { CLIPS } from './data/clips.js';
 
 const BASE_WIDTH = 400;
 const FONT_RATIO = 0.16;
+const IMG_RE = /\.(png|jpe?g|webp|gif)(\?|#|$)/i;
 
 const SERVICES = [
   {
@@ -94,7 +95,7 @@ function ProfilePanel() {
 /* Карточка DOM-fallback (без WebGL): та же геометрия, что и в канвасе */
 function GlowCard({ card }) {
   const h = 240;
-  const isImg = /\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(card.src);
+  const isImg = IMG_RE.test(card.src);
   return (
     <div
       className="shrink-0 overflow-hidden rounded-2xl border border-white/15"
@@ -154,6 +155,8 @@ export default function WarpPage() {
   const [transition, setTransition] = useState('out');
   const [switchSignal, setSwitchSignal] = useState(0);
   const [dip, setDip] = useState(false);
+  const [cardView, setCardView] = useState(null);
+  const openedAtRef = useRef(0);
   const busyRef = useRef(false);
 
   useEffect(() => {
@@ -174,6 +177,15 @@ export default function WarpPage() {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!cardView) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setCardView(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [cardView]);
 
   const handleSelect = (id) => {
     const closing = panelState?.id === id && panelState.open;
@@ -202,6 +214,26 @@ export default function WarpPage() {
       ? SERVICES.find((service) => service.id === panelState.id) ?? null
       : null;
 
+  const handleCard = (card) => {
+    openedAtRef.current = performance.now();
+    setCardView(card);
+    setPanelState({ id: activeId, open: true, card });
+  };
+
+  const shownCardInfo = panelState?.open && panelState.card
+    ? (() => {
+        const dir =
+          SERVICES.find((service) => service.id === panelState.id) ?? {
+            title: 'UI',
+            desc: 'Интерфейсные экраны, макеты и редизайн-наработки.',
+          };
+        return {
+          title: panelState.card.title ?? `${dir.title} · ${panelState.card.h}`,
+          desc: panelState.card.desc ?? dir.desc,
+        };
+      })()
+    : null;
+
   const active = GALLERIES.find((g) => g.id === activeId) ?? GALLERIES[0];
   const reversed = useMemo(() => [...active.cards].reverse(), [active]);
   const rotated = useMemo(
@@ -220,7 +252,7 @@ export default function WarpPage() {
   const fontSize = Math.round(width * FONT_RATIO);
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center justify-between overflow-x-clip bg-[#06030f] px-4 pb-9 pt-3 md:justify-center md:gap-5 md:pb-0 md:pt-0">
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-end overflow-x-clip bg-[#06030f] px-4 pb-9 pt-3 md:justify-center md:pb-0 md:pt-0">
       {bgOn && (
         <div className="fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
           <div className="w-screen">
@@ -229,6 +261,7 @@ export default function WarpPage() {
               className="relative w-full"
               switchSignal={switchSignal}
               transition={transition}
+              onCardClick={handleCard}
               fallback={
                 <div className="space-y-5">
                   <DriftRow cards={active.cards} duration="75s" />
@@ -240,14 +273,14 @@ export default function WarpPage() {
           </div>
         </div>
       )}
-      {/* мобильный: края экрана затемнены — в центре остаётся
-          яркая строка скролла; заголовок сверху, док снизу */}
+      {/* мобильный: градиент снизу вверх — низ уходит в темноту
+          под блоком, верх и середина ленты видны */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-[60] md:hidden"
         style={{
           background:
-            'linear-gradient(to bottom, #06030f 0%, rgba(6,3,15,0.92) 22%, rgba(6,3,15,0) 40%, rgba(6,3,15,0) 60%, rgba(6,3,15,0.92) 78%, #06030f 100%), linear-gradient(to right, rgba(6,3,15,0.88) 0%, rgba(6,3,15,0) 20%, rgba(6,3,15,0) 80%, rgba(6,3,15,0.88) 100%)',
+            'linear-gradient(to top, #06030f 0%, rgba(6,3,15,0.92) 14%, rgba(6,3,15,0.45) 30%, rgba(6,3,15,0) 46%)',
         }}
       />
       {/* dip свапа: ниже контента (80) — заголовок и док остаются яркими */}
@@ -262,6 +295,34 @@ export default function WarpPage() {
             }`,
           }}
         />
+      )}
+      {/* фулскрин карточки: под блоком (80), над строками и дипом */}
+      {cardView && (
+        <div
+          className="fixed inset-0 z-[75] flex cursor-pointer items-center justify-center bg-black/95 p-4 md:p-10"
+          onClick={() => {
+            if (performance.now() - openedAtRef.current < 400) return;
+            setCardView(null);
+          }}
+          role="presentation"
+        >
+          {IMG_RE.test(cardView.src) ? (
+            <img
+              src={cardView.src}
+              alt=""
+              className="h-full w-full object-contain"
+            />
+          ) : (
+            <video
+              src={cardView.src}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full object-contain"
+            />
+          )}
+        </div>
       )}
       <div
         ref={frameRef}
@@ -288,27 +349,21 @@ export default function WarpPage() {
             style={{ height: fontSize, minHeight: 0 }}
           />
         </button>
-        <button
-          type="button"
-          onClick={() => setBgOn((v) => !v)}
-          aria-pressed={bgOn}
-          className="relative z-[90] mt-3 flex items-center gap-2 self-end rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-md transition-colors duration-150 hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 md:fixed md:right-6 md:top-6 md:mt-0"
-        >
-          <span
-            className={`h-2 w-2 rounded-full ${
-              bgOn ? 'bg-emerald-400' : 'bg-white/30'
-            }`}
-          />
-          bg {bgOn ? 'on' : 'off'}
-        </button>
-      </div>
-      <div className="relative z-[80] flex w-full max-w-[400px] flex-col">
         <MagneticDock
           items={DOCK_ITEMS}
           onSelect={handleSelect}
           panelOpen={Boolean(panelState?.open)}
           panel={
-            profileOpen ? (
+            shownCardInfo ? (
+              <div>
+                <p className="text-[14px] font-bold leading-snug text-white">
+                  {shownCardInfo.title}
+                </p>
+                <p className="mt-1 text-[12.5px] font-bold leading-snug text-zinc-300">
+                  {shownCardInfo.desc}
+                </p>
+              </div>
+            ) : profileOpen ? (
               <ProfilePanel />
             ) : shownService ? (
               <div>
@@ -323,6 +378,19 @@ export default function WarpPage() {
           }
         />
       </div>
+      <button
+        type="button"
+        onClick={() => setBgOn((v) => !v)}
+        aria-pressed={bgOn}
+        className="fixed right-4 top-4 z-[90] flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-md transition-colors duration-150 hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 md:right-6 md:top-6"
+      >
+        <span
+          className={`h-2 w-2 rounded-full ${
+            bgOn ? 'bg-emerald-400' : 'bg-white/30'
+          }`}
+        />
+        bg {bgOn ? 'on' : 'off'}
+      </button>
     </main>
   );
 }
