@@ -410,7 +410,7 @@ function createGlassEngine(mount, opts) {
       period: built.period,
       offset: rowMeshes.length * 0.35,
       target: rowMeshes.length * 0.35,
-      isLast: rowMeshes.length === rows.length - 1,
+      isMiddle: rowMeshes.length === (rows.length - 1) >> 1,
       dragging: false,
       speed: 2 / def.duration * SLOW_FACTOR,
       rowTop: 0,
@@ -498,6 +498,9 @@ function createGlassEngine(mount, opts) {
     camera.updateProjectionMatrix();
     rt.setSize(W * dpr, H * dpr);
     uniforms.uAspect.value = W / H;
+    const mob = W < 768;
+    uniforms.uZoom.value = mob ? 1.6 : LENS.zoom;
+    uniforms.uDispersion.value = mob ? 9 : LENS.dispersion;
     layout();
   }
   resize();
@@ -677,7 +680,7 @@ function createGlassEngine(mount, opts) {
         for (let i = 0; i < r.cards.length; i++) {
           const v = getMedia(r.cards[i].src);
           const t = mediaTime(v);
-          const base = r.isLast && W < 768 ? 0.9 : CARD_ALPHA;
+          const base = r.isMiddle && W < 768 ? 0.9 : CARD_ALPHA;
           const a = i === hi ? 1 : base;
           if (t === r.lastT[i] && a === r.lastA[i]) continue;
           r.lastT[i] = t;

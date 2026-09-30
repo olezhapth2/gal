@@ -220,7 +220,7 @@ export default function WarpPage() {
   const fontSize = Math.round(width * FONT_RATIO);
 
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-x-clip bg-[#06030f] px-4">
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-between overflow-x-clip bg-[#06030f] px-4 pb-4 pt-3 md:justify-center md:gap-5 md:pb-0 md:pt-0">
       {bgOn && (
         <div className="fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
           <div className="w-screen">
@@ -240,11 +240,15 @@ export default function WarpPage() {
           </div>
         </div>
       )}
-      {/* мобильный: сверху темно→прозрачно вниз, чтобы текст читался,
-          а нижний ряд оставался видимым */}
+      {/* мобильный: края экрана затемнены — в центре остаётся
+          яркая строка скролла; заголовок сверху, док снизу */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[55vh] bg-gradient-to-b from-[#06030f] via-[#06030f]/55 to-transparent md:hidden"
+        className="pointer-events-none fixed inset-0 z-[60] md:hidden"
+        style={{
+          background:
+            'linear-gradient(to bottom, #06030f 0%, rgba(6,3,15,0.92) 22%, rgba(6,3,15,0) 40%, rgba(6,3,15,0) 60%, rgba(6,3,15,0.92) 78%, #06030f 100%), linear-gradient(to right, rgba(6,3,15,0.88) 0%, rgba(6,3,15,0) 20%, rgba(6,3,15,0) 80%, rgba(6,3,15,0.88) 100%)',
+        }}
       />
       {/* dip свапа: ниже контента (80) — заголовок и док остаются яркими */}
       {bgOn && (
@@ -259,19 +263,6 @@ export default function WarpPage() {
           }}
         />
       )}
-      <button
-        type="button"
-        onClick={() => setBgOn((v) => !v)}
-        aria-pressed={bgOn}
-        className="fixed right-6 top-6 z-[90] flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-md transition-colors duration-150 hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
-      >
-        <span
-          className={`h-2 w-2 rounded-full ${
-            bgOn ? 'bg-emerald-400' : 'bg-white/30'
-          }`}
-        />
-        bg {bgOn ? 'on' : 'off'}
-      </button>
       <div
         ref={frameRef}
         className="relative z-[80] flex w-full max-w-[400px] flex-col gap-5"
@@ -297,6 +288,21 @@ export default function WarpPage() {
             style={{ height: fontSize, minHeight: 0 }}
           />
         </button>
+        <button
+          type="button"
+          onClick={() => setBgOn((v) => !v)}
+          aria-pressed={bgOn}
+          className="relative z-[90] mt-3 flex items-center gap-2 self-end rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-md transition-colors duration-150 hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 md:fixed md:right-6 md:top-6 md:mt-0"
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${
+              bgOn ? 'bg-emerald-400' : 'bg-white/30'
+            }`}
+          />
+          bg {bgOn ? 'on' : 'off'}
+        </button>
+      </div>
+      <div className="relative z-[80] flex w-full max-w-[400px] flex-col">
         <MagneticDock
           items={DOCK_ITEMS}
           onSelect={handleSelect}
