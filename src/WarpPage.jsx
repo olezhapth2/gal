@@ -220,7 +220,7 @@ export default function WarpPage() {
   const fontSize = Math.round(width * FONT_RATIO);
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center justify-between overflow-x-clip bg-[#06030f] px-4 pb-4 pt-3 md:justify-center md:gap-5 md:pb-0 md:pt-0">
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-between overflow-x-clip bg-[#06030f] px-4 pb-9 pt-3 md:justify-center md:gap-5 md:pb-0 md:pt-0">
       {bgOn && (
         <div className="fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
           <div className="w-screen">
