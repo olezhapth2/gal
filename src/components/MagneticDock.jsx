@@ -115,6 +115,7 @@ function MagneticDockBase({
   const rowRef = React.useRef(null);
   const panelRef = React.useRef(null);
   const iconsRef = React.useRef([]);
+  const labelsRef = React.useRef([]);
   const basesRef = React.useRef([]);
   const pointerRef = React.useRef({
     x: -1e4,
@@ -275,6 +276,9 @@ function MagneticDockBase({
       iconsRef.current.forEach((el) => {
         if (el) el.style.transform = "";
       });
+      labelsRef.current.forEach((el) => {
+        if (el) el.style.transform = "";
+      });
       return;
     }
     const states = Array.from(
@@ -345,6 +349,10 @@ function MagneticDockBase({
         st.y += (cfg.lift * inf - st.y) * (1 - Math.exp(-EASE_LIFT * dt));
         st.dx += (d * DRIFT * inf - st.dx) * (1 - Math.exp(-EASE_DRIFT * dt));
         el.style.transform = `translate3d(${st.dx.toFixed(2)}px,${st.y.toFixed(2)}px,0) scale(${st.s.toFixed(3)})`;
+        const lab = labelsRef.current[i];
+        if (lab) {
+          lab.style.transform = `translate3d(${st.dx.toFixed(2)}px,${st.y.toFixed(2)}px,0)`;
+        }
       }
     };
     last = typeof performance !== "undefined" ? performance.now() : 0;
@@ -516,7 +524,12 @@ function MagneticDockBase({
                       </span>
                     </button>
                     </WarmTooltip>
-                    <span className="mt-4 max-w-[54px] truncate text-center text-[9px] font-semibold leading-none tracking-wide text-white/55 md:hidden">
+                    <span
+                      ref={(el) => {
+                        labelsRef.current[i] = el;
+                      }}
+                      className="mt-[10px] max-w-[54px] truncate text-center text-[9px] font-semibold leading-none tracking-wide text-white/55 md:hidden"
+                    >
                       {item.label}
                     </span>
                   </div>

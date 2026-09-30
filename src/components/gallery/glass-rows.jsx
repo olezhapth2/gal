@@ -706,7 +706,9 @@ function createGlassEngine(mount, opts) {
                 : ri === 1
                   ? 0.7
                   : CARD_ALPHA
-              : CARD_ALPHA;
+              : ri <= 1
+                ? 0.9
+                : CARD_ALPHA;
           const a = i === hi ? 1 : base;
           if (t === r.lastT[i] && a === r.lastA[i]) continue;
           r.lastT[i] = t;

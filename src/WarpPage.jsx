@@ -298,7 +298,7 @@ export default function WarpPage() {
   const fontSize = Math.round(width * FONT_RATIO);
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col items-center justify-end overflow-x-clip bg-[#06030f] px-4 pb-9 pt-3 md:justify-center md:pb-0 md:pt-0">
+    <main className="relative flex min-h-screen w-full flex-col items-center justify-end overflow-x-clip bg-[#06030f] px-4 pb-9 pt-3">
       {bgOn && (
         <div className="fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
           <div className="w-screen">
@@ -319,11 +319,11 @@ export default function WarpPage() {
           </div>
         </div>
       )}
-      {/* мобильный: градиент снизу вверх — низ уходит в темноту
-          под блоком, верх и середина ленты видны */}
+      {/* фон: градиент снизу вверх на всех размерах — низ уходит
+          в темноту под блоком, верх и середина ленты видны */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-[60] md:hidden"
+        className="pointer-events-none fixed inset-0 z-[60]"
         style={{
           background:
             'linear-gradient(to top, #06030f 0%, rgba(6,3,15,0.92) 14%, rgba(6,3,15,0.45) 30%, rgba(6,3,15,0) 46%)',
