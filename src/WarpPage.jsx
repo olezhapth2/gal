@@ -8,6 +8,7 @@ import {
   SWITCH_OUT_MS,
 } from './components/gallery/glass-rows.jsx';
 import { CLIPS } from './data/clips.js';
+import { CAPTIONS } from './data/captions.js';
 
 const BASE_WIDTH = 400;
 const FONT_RATIO = 0.16;
@@ -17,31 +18,46 @@ const SERVICES = [
   {
     id: 'fidelity',
     title: 'UX also',
-    desc: 'типографика, иерархия, плотность, адаптивы и доступность по WCAG. Тут глубина: JAVHD и Corgday, где каждый экран меряется конверсией или временем обработки.',
+    desc: {
+      ru: 'типографика, иерархия, плотность, адаптивы и доступность по WCAG. Тут глубина: JAVHD и Corgday, где каждый экран меряется конверсией или временем обработки.',
+      en: 'typography, hierarchy, density, responsive and WCAG accessibility. Depth here: JAVHD and Corgday, where every screen is measured by conversion or processing time.',
+    },
     icon: <span>UX</span>,
   },
   {
     id: 'systems',
     title: 'System',
-    desc: 'Токены, компоненты в Figma, документация состояний и говернанс, чтобы системой пользовались, а не хранили в доке. 1 кодовая база, 20+ скинов, −60% времени на передачу макетов.',
+    desc: {
+      ru: 'Токены, компоненты в Figma, документация состояний и говернанс, чтобы системой пользовались, а не хранили в доке. 1 кодовая база, 20+ скинов, −60% времени на передачу макетов.',
+      en: 'Tokens, Figma components, state docs and governance: teams use the system instead of archiving it. 1 codebase, 20+ skins, −60% handoff time.',
+    },
     icon: <Boxes />,
   },
   {
     id: 'motion',
     title: 'Motion',
-    desc: 'Интерактивные прототипы для проверки до вёрстки, микровзаимодействия и Smart Animate. Готовлю их, чтобы идею показали, а не описали: 300+ туров на геймификации.',
+    desc: {
+      ru: 'Интерактивные прототипы для проверки до вёрстки, микровзаимодействия и Smart Animate. Готовлю их, чтобы идею показали, а не описали: 300+ туров на геймификации.',
+      en: 'Interactive prototypes to validate before markup, micro-interactions and Smart Animate. I build them so the idea comes through in a prototype: 300+ runs on gamification.',
+    },
     icon: <Sparkles />,
   },
   {
     id: 'qa',
     title: 'Metrics',
-    desc: 'Спеки готовые к разработке, парная с фронтом и ревью стейджинга попиксельно. Плюс вёрстка сам: связка Figma → Cursor/Claude Code → GitHub Pages.',
+    desc: {
+      ru: 'Спеки готовые к разработке, парная с фронтом и ревью стейджинга попиксельно. Плюс вёрстка сам: связка Figma → Cursor/Claude Code → GitHub Pages.',
+      en: 'Specs ready for development, paired with frontend and pixel-level staging review. Plus markup myself: Figma → Cursor / Claude Code → GitHub Pages.',
+    },
     icon: <CheckCheck />,
   },
   {
     id: 'ai',
     title: 'Ai Flow',
-    desc: 'Генеративные воркфлоу в ежедневной работе и дизайн AI-взаимодействий: чаты, адаптивные паттерны, human-in-the-loop. 3 года ежедневно, конвейер на n8n и 10 000+ креативов с ревью.',
+    desc: {
+      ru: 'Генеративные воркфлоу в ежедневной работе и дизайн AI-взаимодействий: чаты, адаптивные паттерны, human-in-the-loop. 3 года ежедневно, конвейер на n8n и 10 000+ креативов с ревью.',
+      en: 'Generative workflows in daily work and AI interaction design: chats, adaptive patterns, human-in-the-loop. 3 years daily, an n8n pipeline and 10,000+ creatives with review.',
+    },
     icon: <Bot />,
   },
 ];
@@ -62,30 +78,46 @@ const GALLERIES = [
 ];
 
 /* Плашка профиля по клику на заголовок: имя, почта и две кнопки */
-function ProfilePanel() {
+function ProfilePanel({ lang }) {
   const btn =
     'rounded-[10px] px-3 py-1.5 text-[12.5px] font-bold transition-transform duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:scale-[1.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--motiq-accent,#f5f5f5)]';
+  const t = {
+    ru: {
+      name: 'Девятов Олег Анатольевич',
+      cv: 'Скачать CV',
+      cvFile: '/cv-ru.html',
+      download: 'Oleg-Devyatov-CV-RU.html',
+      write: 'Написать',
+    },
+    en: {
+      name: 'Oleg Devyatov',
+      cv: 'Download CV',
+      cvFile: '/cv-en.html',
+      download: 'Oleg-Devyatov-CV-EN.html',
+      write: 'Email me',
+    },
+  }[lang];
   return (
     <div>
       <p className="text-[14px] font-bold leading-snug text-white">
-        Девятов Олег Анатольевич
+        {t.name}
       </p>
       <p className="mt-1 text-[12.5px] font-bold leading-snug text-zinc-300">
         thaiolezha@gmail.com
       </p>
       <div className="mt-2.5 flex items-center gap-2">
         <a
-          href="/cv.html"
-          download="Oleg-Devyatov-CV.html"
+          href={t.cvFile}
+          download={t.download}
           className={`${btn} bg-[#f5f5f5] text-[#080c14]`}
         >
-          Скачать CV
+          {t.cv}
         </a>
         <a
           href="mailto:thaiolezha@gmail.com"
           className={`${btn} border border-white/25 text-white hover:bg-white/10`}
         >
-          Написать
+          {t.write}
         </a>
       </div>
     </div>
@@ -156,8 +188,17 @@ export default function WarpPage() {
   const [switchSignal, setSwitchSignal] = useState(0);
   const [dip, setDip] = useState(false);
   const [cardView, setCardView] = useState(null);
+  const [lang, setLang] = useState('ru');
   const openedAtRef = useRef(0);
   const busyRef = useRef(false);
+
+  useEffect(() => {
+    document.title =
+      lang === 'ru'
+        ? 'Олег Девятов — UI дизайнер'
+        : 'Oleg Devyatov — UI Designer';
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   useEffect(() => {
     const t = window.setTimeout(
@@ -225,11 +266,16 @@ export default function WarpPage() {
         const dir =
           SERVICES.find((service) => service.id === panelState.id) ?? {
             title: 'UI',
-            desc: 'Интерфейсные экраны, макеты и редизайн-наработки.',
+            desc: {
+              ru: 'Интерфейсные экраны, макеты и редизайн-наработки.',
+              en: 'Interface screens, layouts and redesign work.',
+            },
           };
+        const caption =
+          CAPTIONS[panelState.id]?.[panelState.card.h]?.[lang];
         return {
           title: panelState.card.title ?? `${dir.title} · ${panelState.card.h}`,
-          desc: panelState.card.desc ?? dir.desc,
+          desc: caption ?? dir.desc[lang],
         };
       })()
     : null;
@@ -364,33 +410,52 @@ export default function WarpPage() {
                 </p>
               </div>
             ) : profileOpen ? (
-              <ProfilePanel />
+              <ProfilePanel lang={lang} />
             ) : shownService ? (
               <div>
                 <p className="text-[14px] font-bold leading-snug text-white">
                   {shownService.title}
                 </p>
                 <p className="mt-1 text-[12.5px] font-bold leading-snug text-zinc-300">
-                  {shownService.desc}
+                  {shownService.desc[lang]}
                 </p>
               </div>
             ) : null
           }
         />
       </div>
-      <button
-        type="button"
-        onClick={() => setBgOn((v) => !v)}
-        aria-pressed={bgOn}
-        className="fixed right-4 top-4 z-[90] flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-md transition-colors duration-150 hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 md:right-6 md:top-6"
-      >
-        <span
-          className={`h-2 w-2 rounded-full ${
-            bgOn ? 'bg-emerald-400' : 'bg-white/30'
-          }`}
-        />
-        bg {bgOn ? 'on' : 'off'}
-      </button>
+      <div className="fixed right-4 top-4 z-[90] flex items-center gap-2 md:right-6 md:top-6">
+        <div className="flex items-center gap-0.5 rounded-full border border-white/15 bg-black/40 p-1 text-[11px] font-bold uppercase tracking-[0.14em] backdrop-blur-md">
+          {['ru', 'en'].map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLang(l)}
+              aria-pressed={lang === l}
+              className={`rounded-full px-2.5 py-1 transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 ${
+                lang === l
+                  ? 'bg-white/90 text-[#080c14]'
+                  : 'text-white/60 hover:text-white'
+              }`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setBgOn((v) => !v)}
+          aria-pressed={bgOn}
+          className="flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/80 backdrop-blur-md transition-colors duration-150 hover:border-white/30 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${
+              bgOn ? 'bg-emerald-400' : 'bg-white/30'
+            }`}
+          />
+          bg {bgOn ? 'on' : 'off'}
+        </button>
+      </div>
     </main>
   );
 }
