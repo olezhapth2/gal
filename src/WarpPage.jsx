@@ -398,7 +398,7 @@ export default function WarpPage() {
                 src={hdSrc}
                 alt=""
                 onError={fallback}
-                className="h-full w-full object-contain"
+                className="max-h-full max-w-full object-contain"
               />
             ) : (
               <video
@@ -409,7 +409,7 @@ export default function WarpPage() {
                 muted
                 playsInline
                 onError={fallback}
-                className="h-full w-full object-contain"
+                className="max-h-full max-w-full object-contain"
               />
             )}
           </div>
@@ -419,6 +419,17 @@ export default function WarpPage() {
         ref={frameRef}
         className="relative z-[80] flex w-full max-w-[400px] flex-col gap-5"
       >
+        {/* мягкая чёрная тень вверх от дока, только во фулскрине */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute bottom-0 left-1/2 h-[300px] w-screen -translate-x-1/2 transition-opacity duration-300 ease-out ${
+            cardView ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            background:
+              'linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.4) 55%, rgba(0,0,0,0) 100%)',
+          }}
+        />
         <button
           type="button"
           onClick={() => handleSelect('ui')}
