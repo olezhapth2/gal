@@ -77,6 +77,34 @@ const GALLERIES = [
   { id: 'ui', label: 'UI', cards: CLIPS.ui },
 ];
 
+/* Названия проектов в подписях: первое вхождение → заголовок панели */
+const PROJECT_NAMES = [
+  'JAVHD', 'Corgday', 'GARAGE', 'korona•tech', 'MiraiTech',
+  'PNB Agency', 'PNB', 'White Label', 'ShugarAi', 'GATE19', 'Gate19',
+  'AdRider', 'DAOmars', 'TeamLead Siberia', 'WOW IMAGE',
+];
+/* Ссылки проектов: показываем только адрес, без https:// */
+const PROJECT_URLS = {
+  javhd: { url: 'https://olezhapth2.github.io/PRODUCT-DESIGNER/', label: 'olezhapth2.github.io/PRODUCT-DESIGNER' },
+  gate19: { url: 'https://olezhapth2.github.io/PRODUCT-DESIGNER/', label: 'olezhapth2.github.io/PRODUCT-DESIGNER' },
+  pnb: { url: 'https://pnb.agency', label: 'pnb.agency' },
+  'pnb agency': { url: 'https://pnb.agency', label: 'pnb.agency' },
+  miraitech: { url: 'https://miraitech.co', label: 'miraitech.co' },
+};
+
+function detectProject(caption) {
+  let best = null;
+  let bestIdx = Infinity;
+  for (const name of PROJECT_NAMES) {
+    const i = caption.indexOf(name);
+    if (i >= 0 && i < bestIdx) {
+      bestIdx = i;
+      best = name;
+    }
+  }
+  return best;
+}
+
 /* Плашка профиля по клику на заголовок: имя, почта и две кнопки */
 function ProfilePanel({ lang }) {
   const btn =
@@ -229,6 +257,7 @@ export default function WarpPage() {
   }, [cardView]);
 
   const handleSelect = (id) => {
+    setCardView(null);
     const closing = panelState?.id === id && panelState.open;
     setPanelState({ id, open: !closing });
     if (closing || busyRef.current || !bgOn) return;
@@ -271,10 +300,13 @@ export default function WarpPage() {
               en: 'Interface screens, layouts and redesign work.',
             },
           };
-        const caption =
-          CAPTIONS[panelState.id]?.[panelState.card.h]?.[lang];
+        const cardCaptions = CAPTIONS[panelState.id]?.[panelState.card.h];
+        const caption = cardCaptions?.[lang] ?? cardCaptions?.ru;
+        const proj = caption ? detectProject(caption) : null;
+        const link = proj ? PROJECT_URLS[proj.toLowerCase()] ?? null : null;
         return {
-          title: panelState.card.title ?? `${dir.title} · ${panelState.card.h}`,
+          title: proj ?? dir.title,
+          link,
           desc: caption ?? dir.desc[lang],
         };
       })()
@@ -343,33 +375,46 @@ export default function WarpPage() {
         />
       )}
       {/* фулскрин карточки: под блоком (80), над строками и дипом */}
-      {cardView && (
-        <div
-          className="fixed inset-0 z-[75] flex cursor-pointer items-center justify-center bg-black/95 p-4 md:p-10"
-          onClick={() => {
-            if (performance.now() - openedAtRef.current < 400) return;
-            setCardView(null);
-          }}
-          role="presentation"
-        >
-          {IMG_RE.test(cardView.src) ? (
-            <img
-              src={cardView.src}
-              alt=""
-              className="h-full w-full object-contain"
-            />
-          ) : (
-            <video
-              src={cardView.src}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="h-full w-full object-contain"
-            />
-          )}
-        </div>
-      )}
+      {cardView && (() => {
+        const hdSrc = cardView.hd || cardView.src;
+        const fallback = (e) => {
+          const el = e.currentTarget;
+          if (el.dataset.fb) return;
+          el.dataset.fb = '1';
+          el.src = cardView.src;
+        };
+        return (
+          <div
+            className="fixed inset-0 z-[75] flex cursor-pointer items-center justify-center bg-black p-4 md:p-10"
+            onClick={() => {
+              if (performance.now() - openedAtRef.current < 400) return;
+              setCardView(null);
+            }}
+            role="presentation"
+          >
+            {IMG_RE.test(cardView.src) ? (
+              <img
+                key={hdSrc}
+                src={hdSrc}
+                alt=""
+                onError={fallback}
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <video
+                key={hdSrc}
+                src={hdSrc}
+                autoPlay
+                loop
+                muted
+                playsInline
+                onError={fallback}
+                className="h-full w-full object-contain"
+              />
+            )}
+          </div>
+        );
+      })()}
       <div
         ref={frameRef}
         className="relative z-[80] flex w-full max-w-[400px] flex-col gap-5"
@@ -402,9 +447,20 @@ export default function WarpPage() {
           panel={
             shownCardInfo ? (
               <div>
-                <p className="text-[14px] font-bold leading-snug text-white">
-                  {shownCardInfo.title}
-                </p>
+                {shownCardInfo.link ? (
+                  <a
+                    href={shownCardInfo.link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block break-all text-[14px] font-bold leading-snug text-white underline decoration-white/40 underline-offset-2 transition-colors hover:decoration-white"
+                  >
+                    {shownCardInfo.link.label}
+                  </a>
+                ) : (
+                  <p className="text-[14px] font-bold leading-snug text-white">
+                    {shownCardInfo.title}
+                  </p>
+                )}
                 <p className="mt-1 text-[12.5px] font-bold leading-snug text-zinc-300">
                   {shownCardInfo.desc}
                 </p>

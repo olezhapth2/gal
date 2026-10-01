@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Renderer, Program, Mesh, Triangle, Texture } from 'ogl';
 
 const vertex = `#version 300 es
@@ -232,6 +232,9 @@ const WarpText = ({
   style
 }) => {
   const containerRef = useRef(null);
+  const retryRef = useRef(0);
+  const [glVersion, setGlVersion] = useState(0);
+  const [glLost, setGlLost] = useState(false);
   const propsRef = useRef({
     text,
     color,
@@ -431,6 +434,11 @@ const WarpText = ({
       contextLost = true;
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
+      setGlLost(true);
+      if (retryRef.current < 2) {
+        retryRef.current += 1;
+        window.setTimeout(() => setGlVersion((v) => v + 1), 150);
+      }
     };
 
     const onVisibility = () => {
@@ -498,10 +506,12 @@ const WarpText = ({
     contextRef.current = { program, rasterize };
     resize();
     raf = requestAnimationFrame(loop);
+    const recoverTimer = window.setTimeout(() => setGlLost(false), 0);
 
     return () => {
       disposed = true;
       contextRef.current = null;
+      window.clearTimeout(recoverTimer);
       if (raf) cancelAnimationFrame(raf);
       resizeObserver?.disconnect();
       intersectionObserver?.disconnect();
@@ -524,7 +534,7 @@ const WarpText = ({
 
       if (canvas.parentNode === container) container.removeChild(canvas);
     };
-  }, []);
+  }, [glVersion]);
 
   return (
     <div
@@ -533,7 +543,22 @@ const WarpText = ({
       style={style}
       role="img"
       aria-label={text}
-    />
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 grid place-items-center whitespace-pre text-center transition-opacity duration-200"
+        style={{
+          fontSize,
+          fontWeight,
+          letterSpacing: '-0.06em',
+          lineHeight: 0.87,
+          color,
+          opacity: glLost ? 1 : 0,
+        }}
+      >
+        {text}
+      </span>
+    </div>
   );
 };
 
