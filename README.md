@@ -20,7 +20,7 @@ npm run lint     # eslint
 
 `public/motion/<галерея>/*` — mp4 (h264 ≤720p, loop) + jpg-скриншоты;
 `src/data/clips.js` — список карточек с реальными iw/ih (ffprobe).
-`public/cv.html` — CV по кнопке «Скачать CV».
+`public/Oleg-Devyatov-CV-*.pdf` — CV (PDF) по кнопке «Download CV».
 
 ## Деплой
 
