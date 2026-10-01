@@ -422,7 +422,12 @@ export default function WarpPage() {
         <button
           type="button"
           onClick={() => handleSelect('ui')}
-          className="block w-full cursor-pointer border-0 bg-transparent p-0 text-left [font:inherit]"
+          aria-hidden={cardView ? true : undefined}
+          tabIndex={cardView ? -1 : undefined}
+          className={`block w-full cursor-pointer border-0 bg-transparent p-0 text-left [font:inherit] transition-opacity duration-300 ease-out ${
+            cardView ? 'pointer-events-none' : ''
+          }`}
+          style={{ opacity: cardView ? 0 : 1 }}
         >
           <WarpText
             text="UI DESIGNER"
